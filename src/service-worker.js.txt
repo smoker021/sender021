@@ -1,0 +1,29 @@
+// هنگام نصب سرویس‌ورکر فایل‌ها رو کش کن
+self.addEventListener('install', (event) => {
+  console.log
+  event.waitUntil(
+    caches.open('my-cache').then((cache) => {
+      return cache.addAll([
+        '/',
+        '/index.html',
+        '/static/js/bundle.js',
+        '/static/js/0.chunk.js',
+        '/static/js/main.chunk.js',
+        '/favicon.ico',
+        '/manifest.json',
+        '/logo192.png',
+        '/logo512.png',
+      ]);
+    })
+  );
+});
+
+// درخواست‌ها رو از کش بگیر
+self.addEventListener('fetch', (event) => {
+  console.log('Fetching:', event.request.url);
+  event.respondWith(
+    caches.match(event.request).then((response) => {
+      return response || fetch(event.request);
+    })
+  );
+});

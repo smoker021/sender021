@@ -1,0 +1,62 @@
+.App {
+  max-width: 600px;
+  margin: auto;
+  font-family: Arial, sans-serif;
+}
+
+h1 {
+  text-align: center;
+}
+
+label {
+  display: block;
+  margin-top: 10px;
+  font-weight: bold;
+}
+
+input,
+textarea,
+button {
+  display: block;
+  width: 100%;
+  margin-top: 5px;
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+}
+
+button {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+button:disabled {
+  background-color: #d3d3d3;
+  cursor: not-allowed;
+}
+
+button:hover:not(:disabled) {
+  background-color: #0056b3;
+}
+
+.recipient-field {
+  display: flex;
+  align-items: center;
+}
+
+.recipient-field input {
+  flex: 1;
+}
+
+.recipient-field button {
+  margin-left: 10px;
+  width: auto;
+  padding: 10px;
+}
+
+textarea {
+  resize: none;
+  height: 100px;
+}
