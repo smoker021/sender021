@@ -6,7 +6,13 @@ const nodemailer = require("nodemailer");
 const app = express();
 const PORT = 5000;
 
-app.use(cors());
+// تنظیم CORS
+app.use(cors({
+  origin: '*', // همه درخواست‌ها مجازند. می‌توانید این را به آدرس خاصی محدود کنید، مثل: 'https://sender021.onrender.com'
+  methods: ['GET', 'POST'], // متدهای مجاز
+  allowedHeaders: ['Content-Type'], // هدرهای مجاز
+}));
+
 app.use(bodyParser.json());
 
 // لیست ایمیل‌ها و رمزهای عبور

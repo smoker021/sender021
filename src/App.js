@@ -1,26 +1,42 @@
 import React, { useState } from 'react';
 
 const EmailSender = () => {
-  const [numberOfEmails, setNumberOfEmails] = useState(90); // تعداد پیش‌فرض ایمیل‌ها
-  const [delay, setDelay] = useState(300000); // تأخیر پیش‌فرض: 5 دقیقه (300,000 میلی‌ثانیه)
-  const [recipientEmail, setRecipientEmail] = useState(''); // ایمیل گیرنده
+  const [emails, setEmails] = useState(['']);
+  const [numberOfEmails, setNumberOfEmails] = useState(90);
+  const [delay, setDelay] = useState(300000);
   const [subject, setSubject] = useState('');
   const [body, setBody] = useState('');
 
+  const handleAddEmail = () => {
+    setEmails([...emails, '']);
+  };
+
+  const handleRemoveEmail = (index) => {
+    const updatedEmails = [...emails];
+    updatedEmails.splice(index, 1);
+    setEmails(updatedEmails);
+  };
+
+  const handleChangeEmail = (index, value) => {
+    const updatedEmails = [...emails];
+    updatedEmails[index] = value;
+    setEmails(updatedEmails);
+  };
+
   const handleSendEmails = async () => {
-    if (!recipientEmail || !subject || !body) {
+    if (emails.some((email) => !email) || !subject || !body) {
       alert('Please fill in all fields.');
       return;
     }
 
     try {
-      const response = await fetch('http://localhost:5000/send-email', {
+      const response = await fetch('https://sender021.onrender.com/send-email', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          to: recipientEmail,
+          to: emails,
           subject,
           body,
           count: numberOfEmails,
@@ -43,16 +59,32 @@ const EmailSender = () => {
   return (
     <div style={styles.container}>
       <h1 style={styles.header}>Email Sender</h1>
-      <div style={styles.inputGroup}>
-        <label style={styles.label}>Recipient Email:</label>
-        <input
-          type="email"
-          value={recipientEmail}
-          onChange={(e) => setRecipientEmail(e.target.value)}
-          style={styles.input}
-          placeholder="Enter recipient email"
-        />
-      </div>
+
+      {emails.map((email, index) => (
+        <div key={index} style={styles.inputGroup}>
+          <label style={styles.label}>Recipient Email {index + 1}:</label>
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => handleChangeEmail(index, e.target.value)}
+            style={styles.input}
+            placeholder="Enter recipient email"
+          />
+          {emails.length > 1 && (
+            <button
+              onClick={() => handleRemoveEmail(index)}
+              style={styles.removeButton}
+            >
+              Remove
+            </button>
+          )}
+        </div>
+      ))}
+
+      <button onClick={handleAddEmail} style={styles.addButton}>
+        Add Email
+      </button>
+
       <div style={styles.inputGroup}>
         <label style={styles.label}>Number of Emails:</label>
         <input
@@ -144,6 +176,24 @@ const styles = {
     cursor: 'pointer',
     width: '100%',
     fontSize: '16px',
+  },
+  addButton: {
+    padding: '10px',
+    backgroundColor: '#28a745',
+    color: '#fff',
+    border: 'none',
+    borderRadius: '5px',
+    cursor: 'pointer',
+    marginBottom: '20px',
+  },
+  removeButton: {
+    marginLeft: '10px',
+    padding: '5px 10px',
+    backgroundColor: '#dc3545',
+    color: '#fff',
+    border: 'none',
+    borderRadius: '5px',
+    cursor: 'pointer',
   },
 };
 
