@@ -2,6 +2,7 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
 const nodemailer = require("nodemailer");
+const path = require("path");
 
 const app = express();
 const PORT = process.env.PORT || 5000; // تنظیم پورت به صورت داینامیک برای Render
@@ -9,13 +10,17 @@ const PORT = process.env.PORT || 5000; // تنظیم پورت به صورت دا
 // تنظیم CORS
 app.use(
   cors({
-    origin: "*", // همه درخواست‌ها مجازند. می‌توانید این را به آدرس خاصی محدود کنید، مثل: 'https://sender021.onrender.com'
+    origin: "*", // همه درخواست‌ها مجازند
     methods: ["GET", "POST"], // متدهای مجاز
     allowedHeaders: ["Content-Type"], // هدرهای مجاز
   })
 );
 
 app.use(bodyParser.json());
+
+// سرو کردن فایل‌های استاتیک از فولدر build
+const buildPath = path.join(__dirname, "build");
+app.use(express.static(buildPath));
 
 // لیست ایمیل‌ها و رمزهای عبور
 const emailAccounts = [
@@ -82,11 +87,10 @@ app.post("/send-email", async (req, res) => {
   res.status(200).json({ message: "Emails sent successfully" });
 });
 
-// مسیر اصلی
-app.get("/", (req, res) => {
-  res.send("Server is running!");
+// مسیر پیش‌فرض برای اپلیکیشن React
+app.get("*", (req, res) => {
+  res.sendFile(path.join(buildPath, "index.html"));
 });
 
-app.listen(PORT, () => {
-  console.log(`[DEBUG] Server is running on http://localhost:${PORT}`);
-});
+// راه‌اندازی سرور
+app.listen(
