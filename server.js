@@ -4,14 +4,16 @@ const cors = require("cors");
 const nodemailer = require("nodemailer");
 
 const app = express();
-const PORT = 5000;
+const PORT = process.env.PORT || 5000; // تنظیم پورت به صورت داینامیک برای Render
 
 // تنظیم CORS
-app.use(cors({
-  origin: '*', // همه درخواست‌ها مجازند. می‌توانید این را به آدرس خاصی محدود کنید، مثل: 'https://sender021.onrender.com'
-  methods: ['GET', 'POST'], // متدهای مجاز
-  allowedHeaders: ['Content-Type'], // هدرهای مجاز
-}));
+app.use(
+  cors({
+    origin: "*", // همه درخواست‌ها مجازند. می‌توانید این را به آدرس خاصی محدود کنید، مثل: 'https://sender021.onrender.com'
+    methods: ["GET", "POST"], // متدهای مجاز
+    allowedHeaders: ["Content-Type"], // هدرهای مجاز
+  })
+);
 
 app.use(bodyParser.json());
 
