@@ -93,4 +93,6 @@ app.get("*", (req, res) => {
 });
 
 // راه‌اندازی سرور
-app.listen(
+app.listen(PORT, () => {
+  console.log(`[DEBUG] Server is running on http://localhost:${PORT}`);
+});
