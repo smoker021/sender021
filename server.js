@@ -1,3 +1,6 @@
+// نادیده گرفتن هشدارهای منسوخ‌شدن
+process.removeAllListeners('warning');
+
 const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
@@ -5,24 +8,21 @@ const nodemailer = require("nodemailer");
 const path = require("path");
 
 const app = express();
-const PORT = process.env.PORT || 5000; // تنظیم پورت به صورت داینامیک برای Render
+const PORT = process.env.PORT || 5000;
 
-// تنظیم CORS
 app.use(
   cors({
-    origin: "*", // همه درخواست‌ها مجازند
-    methods: ["GET", "POST"], // متدهای مجاز
-    allowedHeaders: ["Content-Type"], // هدرهای مجاز
+    origin: "*",
+    methods: ["GET", "POST"],
+    allowedHeaders: ["Content-Type"],
   })
 );
 
 app.use(bodyParser.json());
 
-// سرو کردن فایل‌های استاتیک از فولدر build
 const buildPath = path.join(__dirname, "build");
 app.use(express.static(buildPath));
 
-// لیست ایمیل‌ها و رمزهای عبور
 const emailAccounts = [
   { email: "Abhigyan93Novikov@gmail.com", password: "znfv csna uphs clyn" },
   { email: "rashel729Morozov@gmail.com", password: "allo qnyl klmh sghd" },
@@ -37,24 +37,25 @@ const emailAccounts = [
   { email: "alexander728popov@gmail.com", password: "kicd ndld rdvi sgxw" },
 ];
 
-// مسیر ارسال ایمیل
 app.post("/send-email", async (req, res) => {
   const { to, subject, body, count, delay } = req.body;
 
-  // بررسی ورودی‌ها
   if (!to || !subject || !body || !count || !delay) {
     console.error("[ERROR] Missing required fields");
     return res.status(400).json({ message: "Missing required fields" });
   }
 
-  let emailIndex = 0; // ایندکس شروع در لیست ایمیل‌ها
+  let emailIndex = 0;
+  let sentCount = 0;
 
-  // ارسال ایمیل‌ها به صورت چرخه‌ای
-  for (let i = 0; i < count; i++) {
+  const sendEmail = async () => {
+    if (sentCount >= count) {
+      return res.status(200).json({ message: "Emails sent successfully", sentCount });
+    }
+
     const senderEmail = emailAccounts[emailIndex].email;
     const senderPassword = emailAccounts[emailIndex].password;
 
-    // تنظیمات SMTP
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
@@ -64,7 +65,6 @@ app.post("/send-email", async (req, res) => {
     });
 
     try {
-      // ارسال ایمیل
       const info = await transporter.sendMail({
         from: senderEmail,
         to,
@@ -73,26 +73,23 @@ app.post("/send-email", async (req, res) => {
       });
 
       console.log(`[DEBUG] Email sent from ${senderEmail} to ${to}:`, info.response);
-
-      // تغییر ایندکس برای استفاده از ایمیل بعدی (به صورت چرخه‌ای)
+      sentCount++;
       emailIndex = (emailIndex + 1) % emailAccounts.length;
 
-      // تأخیر قبل از ارسال ایمیل بعدی
-      await new Promise((resolve) => setTimeout(resolve, delay));
+      setTimeout(sendEmail, delay);
     } catch (error) {
       console.error(`[ERROR] Failed to send email from ${senderEmail}:`, error);
+      setTimeout(sendEmail, delay);
     }
-  }
+  };
 
-  res.status(200).json({ message: "Emails sent successfully" });
+  sendEmail();
 });
 
-// مسیر پیش‌فرض برای اپلیکیشن React
 app.get("*", (req, res) => {
   res.sendFile(path.join(buildPath, "index.html"));
 });
 
-// راه‌اندازی سرور
 app.listen(PORT, () => {
   console.log(`[DEBUG] Server is running on http://localhost:${PORT}`);
 });

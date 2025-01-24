@@ -1,11 +1,24 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 const EmailSender = () => {
   const [emails, setEmails] = useState(['']);
   const [numberOfEmails, setNumberOfEmails] = useState(90);
+  const [remainingEmails, setRemainingEmails] = useState(numberOfEmails);
   const [delay, setDelay] = useState(300000);
   const [subject, setSubject] = useState('');
   const [body, setBody] = useState('');
+  const [timeRemaining, setTimeRemaining] = useState(0);
+  const [isSending, setIsSending] = useState(false);
+
+  useEffect(() => {
+    if (timeRemaining > 0) {
+      const interval = setInterval(() => {
+        setTimeRemaining((prevTime) => prevTime - 1000);
+      }, 1000);
+
+      return () => clearInterval(interval);
+    }
+  }, [timeRemaining]);
 
   const handleAddEmail = () => {
     setEmails([...emails, '']);
@@ -29,6 +42,9 @@ const EmailSender = () => {
       return;
     }
 
+    setIsSending(true);
+    setTimeRemaining(delay * numberOfEmails); // Set total time remaining
+
     try {
       const response = await fetch('https://sender021.onrender.com/send-email', {
         method: 'POST',
@@ -45,6 +61,8 @@ const EmailSender = () => {
       });
 
       if (response.ok) {
+        const data = await response.json();
+        setRemainingEmails(remainingEmails - data.sentCount);
         alert('Emails sent successfully!');
       } else {
         const errorData = await response.json();
@@ -53,7 +71,15 @@ const EmailSender = () => {
     } catch (error) {
       console.error('Error sending emails:', error);
       alert('An error occurred while sending emails.');
+    } finally {
+      setIsSending(false);
     }
+  };
+
+  const formatTime = (milliseconds) => {
+    const minutes = Math.floor(milliseconds / 60000);
+    const seconds = Math.floor((milliseconds % 60000) / 1000);
+    return `${minutes}m ${seconds}s`;
   };
 
   return (
@@ -90,7 +116,10 @@ const EmailSender = () => {
         <input
           type="number"
           value={numberOfEmails}
-          onChange={(e) => setNumberOfEmails(Number(e.target.value))}
+          onChange={(e) => {
+            setNumberOfEmails(Number(e.target.value));
+            setRemainingEmails(Number(e.target.value));
+          }}
           style={styles.input}
         />
       </div>
@@ -122,8 +151,12 @@ const EmailSender = () => {
           placeholder="Enter email body"
         />
       </div>
-      <button onClick={handleSendEmails} style={styles.sendButton}>
-        Send Emails
+      <div style={styles.inputGroup}>
+        <label style={styles.label}>Time Remaining:</label>
+        <div>{formatTime(timeRemaining)}</div>
+      </div>
+      <button onClick={handleSendEmails} style={styles.sendButton} disabled={isSending}>
+        {isSending ? 'Sending...' : 'Send Emails'}
       </button>
     </div>
   );
