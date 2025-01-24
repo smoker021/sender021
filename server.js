@@ -1,5 +1,5 @@
 // نادیده گرفتن هشدارهای منسوخ‌شدن
-process.removeAllListeners('warning');
+process.removeAllListeners("warning");
 
 const express = require("express");
 const bodyParser = require("body-parser");
@@ -50,7 +50,9 @@ app.post("/send-email", async (req, res) => {
 
   const sendEmail = async () => {
     if (sentCount >= count) {
-      return res.status(200).json({ message: "Emails sent successfully", sentCount });
+      return res
+        .status(200)
+        .json({ message: "Emails sent successfully", sentCount });
     }
 
     const senderEmail = emailAccounts[emailIndex].email;
@@ -86,6 +88,7 @@ app.post("/send-email", async (req, res) => {
   sendEmail();
 });
 
+// مدیریت مسیرهای دیگر و هدایت به فایل index.html
 app.get("*", (req, res) => {
   res.sendFile(path.join(buildPath, "index.html"));
 });
