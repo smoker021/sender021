@@ -89,8 +89,8 @@ app.post("/send-email", async (req, res) => {
 });
 
 // مدیریت مسیرهای دیگر و هدایت به فایل index.html
-app.get("*", (req, res) => {
-  res.sendFile(path.join(buildPath, "index.html"));
+app.get("/*", (req, res) => {
+  res.sendFile(path.join(__dirname, "build", "index.html"));
 });
 
 app.listen(PORT, () => {
